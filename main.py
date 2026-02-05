@@ -30,6 +30,7 @@ from controllers.order_detail_controller import OrderDetailController
 from controllers.product_controller import ProductController
 from controllers.review_controller import ReviewController
 from controllers.health_check import router as health_check_controller
+from controllers.auth_controller import router as auth_router
 from repositories.base_repository_impl import InstanceNotFoundError
 
 
@@ -83,6 +84,7 @@ def create_fastapi_app() -> FastAPI:
     fastapi_app.include_router(category_controller.router, prefix="/categories")
 
     fastapi_app.include_router(health_check_controller, prefix="/health_check")
+    fastapi_app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
 
     # Add middleware (LIFO order - last added runs first)
     # Request ID middleware runs FIRST (innermost) to capture all logs
@@ -90,10 +92,10 @@ def create_fastapi_app() -> FastAPI:
     logger.info("✅ Request ID middleware enabled (distributed tracing)")
 
     # CORS Configuration
-    cors_origins = os.getenv("CORS_ORIGINS", "*").split(",")
+    cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",")
     fastapi_app.add_middleware(
         CORSMiddleware,
-        allow_origins=cors_origins if cors_origins != ["*"] else ["*"],
+        allow_origins=cors_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -145,10 +147,14 @@ def run_app(fastapi_app: FastAPI):
     uvicorn.run(fastapi_app, host="0.0.0.0", port=8000)
 
 
+# Create app instance at module level for production (Render/Uvicorn)
+app = create_fastapi_app()
+
+
 if __name__ == "__main__":
     # Create database tables on startup
     create_tables()
 
-    # Create and run FastAPI application
-    app = create_fastapi_app()
+    # Run FastAPI application
     run_app(app)
+

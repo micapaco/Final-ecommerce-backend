@@ -29,4 +29,10 @@ class ReviewSchema(BaseSchema):
         description="Product ID reference (required)"
     )
 
+    client_id: Optional[int] = Field(
+        None,
+        description="Client ID who wrote the review (optional)"
+    )
+
     product: Optional['ProductSchema'] = None
+
