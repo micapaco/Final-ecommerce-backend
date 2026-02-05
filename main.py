@@ -10,7 +10,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette import status
-from starlette.responses import JSONResponse
+from starlette.responses import JSONResponse, RedirectResponse
 
 from config.logging_config import setup_logging
 from config.database import create_tables, engine
@@ -49,6 +49,10 @@ def create_fastapi_app() -> FastAPI:
         docs_url="/docs",
         redoc_url="/redoc"
     )
+
+    @fastapi_app.get("/", include_in_schema=False)
+    async def root():
+        return RedirectResponse(url="/docs")
 
     # Global exception handlers
     @fastapi_app.exception_handler(InstanceNotFoundError)
