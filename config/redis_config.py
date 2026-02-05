@@ -40,9 +40,13 @@ class RedisConfig:
         redis_port = int(os.getenv('REDIS_PORT', '6379'))
         redis_db = int(os.getenv('REDIS_DB', '0'))
         redis_password = os.getenv('REDIS_PASSWORD', None)
+        redis_ssl = os.getenv('REDIS_SSL', 'false').lower() == 'true'
         max_connections = int(os.getenv('REDIS_MAX_CONNECTIONS', '50'))
 
         try:
+            # Use SSL pool class if SSL is enabled (required for Upstash, Redis Cloud, etc.)
+            pool_class = redis.connection.SSLConnection if redis_ssl else redis.connection.Connection
+
             # Create connection pool
             self._pool = ConnectionPool(
                 host=redis_host,
@@ -53,7 +57,8 @@ class RedisConfig:
                 decode_responses=True,  # Auto-decode bytes to str
                 socket_timeout=5,
                 socket_connect_timeout=5,
-                retry_on_timeout=True
+                retry_on_timeout=True,
+                connection_class=pool_class
             )
 
             # Create Redis client
