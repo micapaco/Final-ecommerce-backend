@@ -112,6 +112,14 @@ def create_fastapi_app() -> FastAPI:
         """Run on application startup"""
         logger.info("🚀 Starting FastAPI E-commerce API...")
 
+        # Create database tables if they don't exist
+        from config.database import create_tables
+        try:
+            create_tables()
+            logger.info("✅ Database tables verified/created")
+        except Exception as e:
+            logger.error(f"❌ Error creating tables: {e}")
+
         # Check Redis connection
         if check_redis_connection():
             logger.info("✅ Redis cache is available")
