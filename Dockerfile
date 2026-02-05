@@ -52,5 +52,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 # Expose port
 EXPOSE 8000
 
-# Run main.py when the container launches
-CMD ["python", "-m", "main"]
+# Run uvicorn when the container launches (PORT from Render environment)
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
