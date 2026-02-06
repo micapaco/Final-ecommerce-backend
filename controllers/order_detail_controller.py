@@ -25,6 +25,31 @@ class OrderDetailController(BaseControllerImpl):
             tags=["Order Details"]
         )
 
+        # Override GET endpoint to support filtering by order_id
+        @self.router.get(
+            "/",
+            response_model=List[OrderDetailSchema],
+            status_code=status.HTTP_200_OK,
+            summary="Get Order Details",
+            description="Get all order details, optionally filtered by order_id."
+        )
+        async def get_all_with_filter(
+            skip: int = 0,
+            limit: int = 100,
+            order_id: int = None,
+            db: Session = Depends(get_db)
+        ):
+            """
+            Get order details with optional filtering by order_id.
+            
+            - If order_id is provided, returns only details for that order.
+            - If order_id is not provided, returns all order details.
+            """
+            service = self.service_factory(db)
+            if order_id is not None:
+                return service.get_by_order_id(order_id)
+            return service.get_all(skip=skip, limit=limit)
+
         # Override POST endpoint with rate limiting
         @self.router.post(
             "/",

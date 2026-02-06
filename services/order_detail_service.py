@@ -28,6 +28,21 @@ class OrderDetailService(BaseServiceImpl):
         self._order_repository = OrderRepository(db)
         self._product_repository = ProductRepository(db)
 
+    def get_by_order_id(self, order_id: int) -> list:
+        """
+        Get all order details for a specific order.
+        
+        Args:
+            order_id: The ID of the order to get details for.
+            
+        Returns:
+            List of OrderDetailSchema for the specified order.
+        """
+        results = self._repository.session.query(OrderDetailModel).filter(
+            OrderDetailModel.order_id == order_id
+        ).all()
+        return [self._schema.model_validate(r) for r in results]
+
     def save(self, schema: OrderDetailSchema) -> OrderDetailSchema:
         """
         Create a new order detail with validation and atomic stock management
